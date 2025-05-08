@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h2>Welcome, {{ session['username'] }}!</h2>
+    
+    <div class="stats">
+        <div class="stat-card">
+            <h3>{{ campaigns|length }}</h3>
+            <p>Active Campaigns</p>
+        </div>
+        <div class="stat-card">
+            <h3>
+                {% if campaigns %}
+                    {{ campaigns|sum(attribute='analytics.impressions') }}
+                {% else %}
+                    0
+                {% endif %}
+            </h3>
+            <p>Total Impressions</p>
+        </div>
+        <div class="stat-card">
+            <h3>
+                {% if campaigns %}
+                    {{ (campaigns|sum(attribute='analytics.ctr')/campaigns|length)|round(2) }}%
+                {% else %}
+                    0%
+                {% endif %}
+            </h3>
+            <p>Average CTR</p>
+        </div>
+    </div>
+    
+    <div class="quick-actions">
+        <a href="{{ url_for('create_campaign') }}" class="btn primary">Create New Campaign</a>
+        <a href="{{ url_for('list_campaigns') }}" class="btn secondary">View All Campaigns</a>
+    </div>
+</div>
+{% endblock %}

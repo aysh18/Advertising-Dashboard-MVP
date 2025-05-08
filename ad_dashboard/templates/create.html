@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Create Campaign{% endblock %}
+
+{% block content %}
+<div class="campaign-form">
+    <h2>Create New Campaign</h2>
+    
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="campaign_name">Campaign Name:</label>
+            <input type="text" id="campaign_name" name="campaign_name" required>
+            <button type="button" id="generate-ad-copy" class="btn small">AI Suggest Name</button>
+            <div id="ad-copy-suggestion" class="ad-copy-suggestion"></div>
+        </div>
+        
+        <div class="form-group">
+            <label>Banner Type:</label>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="banner_type" value="url" checked> URL
+                </label>
+                <label>
+                    <input type="radio" name="banner_type" value="file"> Upload Image
+                </label>
+            </div>
+            
+            <div id="banner-url-group">
+                <label for="banner_url">Banner URL:</label>
+                <input type="url" id="banner_url" name="banner_url" placeholder="https://example.com/banner.jpg">
+            </div>
+            
+            <div id="banner-file-group" style="display: none;">
+                <label for="banner_file">Upload Banner:</label>
+                <input type="file" id="banner_file" name="banner_file" accept="image/*">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="age_range">Age Range:</label>
+            <div class="age-range">
+                <input type="number" id="age_min" name="age_min" min="13" max="65" value="18" required>
+                <span>to</span>
+                <input type="number" id="age_max" name="age_max" min="18" max="100" value="65" required>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Locations:</label>
+            <div class="checkbox-group">
+                {% for location in locations %}
+                    <label>
+                        <input type="checkbox" name="locations" value="{{ location }}"> {{ location }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Interests:</label>
+            <div class="checkbox-group">
+                {% for interest in interests %}
+                    <label>
+                        <input type="checkbox" name="interests" value="{{ interest }}"> {{ interest }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <button type="submit" class="btn primary">Create Campaign</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle between URL and file upload
+    const bannerTypeRadios = document.querySelectorAll('input[name="banner_type"]');
+    const bannerUrlGroup = document.getElementById('banner-url-group');
+    const bannerFileGroup = document.getElementById('banner-file-group');
+    
+    bannerTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'url') {
+                bannerUrlGroup.style.display = 'block';
+                bannerFileGroup.style.display = 'none';
+            } else {
+                bannerUrlGroup.style.display = 'none';
+                bannerFileGroup.style.display = 'block';
+            }
+        });
+    });
+    
+    // AI ad copy generation
+    const generateBtn = document.getElementById('generate-ad-copy');
+    const campaignNameInput = document.getElementById('campaign_name');
+    const adCopySuggestion = document.getElementById('ad-copy-suggestion');
+    
+    generateBtn.addEventListener('click', function() {
+        const productName = campaignNameInput.value.trim() || 'your product';
+        
+        fetch('{{ url_for("generate_ad_copy") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `product_name=${encodeURIComponent(productName)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.ad_copy) {
+                adCopySuggestion.textContent = data.ad_copy;
+                adCopySuggestion.style.display = 'block';
+                
+                // Add click to apply functionality
+                adCopySuggestion.onclick = function() {
+                    campaignNameInput.value = data.ad_copy;
+                    adCopySuggestion.style.display = 'none';
+                };
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            adCopySuggestion.textContent = 'Failed to generate suggestion';
+            adCopySuggestion.style.display = 'block';
+        });
+    });
+});
+</script>
+{% endblock %}

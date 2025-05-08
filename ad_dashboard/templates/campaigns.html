@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Campaigns{% endblock %}
+
+{% block content %}
+<div class="campaigns-list">
+    <h2>Your Campaigns</h2>
+    
+    {% if not campaigns %}
+        <p>No campaigns found. <a href="{{ url_for('create_campaign') }}">Create your first campaign</a>.</p>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Banner</th>
+                    <th>Targeting</th>
+                    <th>Analytics</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for campaign in campaigns %}
+                <tr>
+                    <td>{{ campaign.id }}</td>
+                    <td>{{ campaign.name }}</td>
+                    <td>{{ campaign.date }}</td>
+                    <td><span class="status-badge {{ campaign.status.lower() }}">{{ campaign.status }}</span></td>
+                    <td>
+                        {% if campaign.banner %}
+                            <img src="{{ campaign.banner }}" alt="Campaign Banner" class="banner-thumbnail">
+                        {% else %}
+                            No banner
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>Age:</strong> {{ campaign.targeting.age_range }}<br>
+                        <strong>Locations:</strong> {{ campaign.targeting.locations|join(', ') }}<br>
+                        <strong>Interests:</strong> {{ campaign.targeting.interests|join(', ') }}
+                    </td>
+                    <td>
+                        <strong>Impressions:</strong> {{ campaign.analytics.impressions }}<br>
+                        <strong>Clicks:</strong> {{ campaign.analytics.clicks }}<br>
+                        <strong>CTR:</strong> {{ campaign.analytics.ctr }}%<br>
+                        <strong>Spend:</strong> ${{ campaign.analytics.spend }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}
